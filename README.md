@@ -154,16 +154,63 @@ git merge starter/main
 Git cleanly merges updates to `tests/` and `.github/`, leaving your private `content/` drafts untouched.
 
 ### Pattern 2: Reusable GitHub Action (`workflow_call`)
-In your private repo's `.github/workflows/deploy.yml`, simply invoke the public verifier:
+In your private repo's `.github/workflows/deploy.yml`, invoke the public verifier and pass secrets:
 ```yaml
 jobs:
-  validate:
+  verify:
     uses: SixFiveMil/hugo-devsecops-starter/.github/workflows/reusable-verify.yml@main
+    secrets: inherit
 
   deploy:
-    needs: validate
-    # Your private deploy adapter here
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: verified-public-site, path: public }
+      # Your private deploy adapter here (Cloudflare Pages, AWS S3, etc.)
 ```
+
+---
+
+## ⚠️ Implementation Guidance & Troubleshooting Pitfalls
+
+Integrating a private repository with an external reusable workflow has several non-obvious traps. Keep these battle-tested rules in mind:
+
+### 1. No `name` or `runs-on` on Reusable Workflow Caller Jobs
+In GitHub Actions, a job that calls a reusable workflow via `uses:` is a special orchestration job. Adding `name:`, `runs-on:`, `env:`, or `steps:` at that job level will cause GitHub Actions to reject the entire workflow file with a syntax validation error before running any jobs.
+
+```yaml
+# ❌ INCORRECT (Triggers workflow parser failure)
+jobs:
+  verify:
+    name: Run DevSecOps Gates  # <--- FORBIDDEN
+    runs-on: ubuntu-latest     # <--- FORBIDDEN
+    uses: SixFiveMil/hugo-devsecops-starter/.github/workflows/reusable-verify.yml@main
+
+# ✅ CORRECT
+jobs:
+  verify:
+    uses: SixFiveMil/hugo-devsecops-starter/.github/workflows/reusable-verify.yml@main
+    secrets: inherit
+```
+
+### 2. Avoid Nested Concurrency Deadlocks
+If the caller workflow defines a concurrency lock:
+```yaml
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+```
+And the child reusable workflow defines the exact same concurrency block, GitHub evaluates `${{ github.workflow }}` to the caller's workflow name. Both parent and child attempt to lock the exact same mutex, triggering an immediate cancellation:
+> `Canceling since a deadlock was detected for concurrency group: '...' between a top level workflow and 'verify'`
+
+**Rule**: Never define top-level concurrency inside a reusable workflow file (`workflow_call`). Concurrency belongs strictly in the caller pipeline.
+
+### 3. Always Specify `secrets: inherit`
+By default, GitHub Actions does **not** pass secrets—not even `secrets.GITHUB_TOKEN`—into a called reusable workflow. If any step (such as Gitleaks secret scanning) relies on `GITHUB_TOKEN`, you must explicitly declare `secrets: inherit` in the caller job.
+
+### 4. Recursive Submodule Checkout
+If your private repository includes Hugo themes via Git submodules (e.g. `themes/PaperMod`), the checkout step inside the reusable workflow must specify `submodules: recursive` and `fetch-depth: 0`, or Hugo will fail during compilation.
 
 ---
 
