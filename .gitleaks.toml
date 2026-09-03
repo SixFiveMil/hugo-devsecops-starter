@@ -1,0 +1,18 @@
+# Gitleaks Configuration: DevSecOps Baseline
+title = "Gitleaks Static Publishing Baseline"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Global allowlist for sample documentation and placeholders"
+regexes = [
+  '''example\.com''',
+  '''<ACCOUNT_ID>''',
+  '''<API_TOKEN>''',
+  '''dummy_token''',
+]
+paths = [
+  '''README\.md''',
+  '''tests/.*''',
+]

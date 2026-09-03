@@ -1,0 +1,24 @@
+baseURL = "https://example.com/"
+languageCode = "en-us"
+title = "DevSecOps Hugo Starter"
+
+enableRobotsTXT = true
+enableGitInfo = true
+buildDrafts = false
+buildFuture = false
+
+[params]
+  description = "A platform-agnostic, zero-trust static publishing engine with automated DevSecOps quality gates."
+  author = "Security Engineer"
+
+[markup]
+  [markup.goldmark.renderer]
+    unsafe = true
+  [markup.highlight]
+    noClasses = false
+    style = "monokai"
+    lineNos = true
+    codeFences = true
+
+[outputs]
+  home = ["HTML", "RSS", "JSON"]

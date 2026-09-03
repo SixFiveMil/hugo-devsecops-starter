@@ -1,0 +1,8 @@
+{
+  "build_time_utc": "2026-09-03T00:00:00Z",
+  "git_commit_sha": "starter-init",
+  "git_commit_short": "starter",
+  "quality_gates": "Automated DevSecOps Harness",
+  "gitleaks_status": "Clean (0 secrets detected)",
+  "engine": "Hugo Extended"
+}
