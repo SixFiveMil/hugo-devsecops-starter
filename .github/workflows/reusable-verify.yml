@@ -1,0 +1,65 @@
+name: Agnostic Hugo DevSecOps Verification
+
+on:
+  workflow_call:
+    outputs:
+      artifact-name:
+        description: "The name of the verified public site artifact"
+        value: "verified-public-site"
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Build & Verify (DevSecOps Quality Gates)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      # DevSecOps Gate 1: Secret and credential scanning
+      - name: Scan for Leaked Secrets (Gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Set up static site generator (Hugo Extended)
+      - name: Set up Hugo Extended
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: "latest"
+          extended: true
+
+      # Compile immutable static assets
+      - name: Build Site
+        run: hugo --minify --gc --cleanDestinationDir
+
+      # Set up Python for headless HTML quality gates
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # DevSecOps Gate 2: Headless Python quality & security test suite
+      - name: Run Quality & Security Gates
+        run: python -m unittest discover -s tests -v
+
+      # Archive verified static artifact for pluggable deployment adapters
+      - name: Upload Verified Static Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: verified-public-site
+          path: public/
+          retention-days: 1
