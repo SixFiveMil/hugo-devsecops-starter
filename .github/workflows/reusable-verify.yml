@@ -2,10 +2,6 @@ name: Agnostic Hugo DevSecOps Verification
 
 on:
   workflow_call:
-    outputs:
-      artifact-name:
-        description: "The name of the verified public site artifact"
-        value: "verified-public-site"
   push:
     branches: [main, master]
   pull_request:
