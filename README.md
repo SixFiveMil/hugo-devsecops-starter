@@ -243,5 +243,12 @@ gitleaks detect --source . --verbose
 
 ---
 
+## 🌐 Production Implementation
+
+This engine powers the zero-trust publication and automated CI/CD release pipeline for [Code and Cypher](https://codeandcypher.com/), an enterprise cybersecurity research publication by Joshua A. Wortz.
+
+---
+
 ## 📄 License
 This project is open-source under the [MIT License](LICENSE).
+
