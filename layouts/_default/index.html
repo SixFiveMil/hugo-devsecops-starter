@@ -1,12 +1,12 @@
 {{ define "main" }}
 <section class="hero">
-  <h2>Welcome to {{ site.Title }}</h2>
+  <h1>Welcome to {{ site.Title }}</h1>
   <p>{{ site.Params.description }}</p>
 </section>
 
 <section class="posts">
-  <h3>Recent Articles</h3>
-  <ul>
+  <h2>Recent Articles</h2>
+  <ul class="post-list">
     {{ range first 10 site.RegularPages }}
     <li>
       <a href="{{ .RelPermalink }}">{{ .Title }}</a>

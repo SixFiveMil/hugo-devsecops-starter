@@ -1,11 +1,12 @@
 # 🛡️ Hugo DevSecOps Starter
 
-> A platform-agnostic, zero-trust static publishing engine with automated Gitleaks scanning, headless Python security quality gates, and pluggable edge deployment adapters.
+> Universal, platform-agnostic, zero-trust static publishing engine with automated Gitleaks scanning, headless Python DevSecOps quality gates, shift-left CLI tooling, and pluggable edge deployment adapters.
 
-[![DevSecOps Engine](https://img.shields.io/badge/DevSecOps-Automated%20Gates-blue)](#-the-4-devsecops-quality-gates)
+[![DevSecOps Engine](https://img.shields.io/badge/DevSecOps-Automated%20Gates-blue)](#-the-5-devsecops-quality-pillars)
 [![Gitleaks](https://img.shields.io/badge/Security-Gitleaks%20Protected-green)](#gate-1-supply-chain--secret-scanning)
-[![Python 3.12](https://img.shields.io/badge/Tests-Python%203.12%20Harness-blue)](#gate-3-headless-python-security-quality-gates)
-[![Hugo Extended](https://img.shields.io/badge/Generator-Hugo%20Extended-FF4088)](#local-development-quickstart)
+[![Tests: 33+ Universal Gates](https://img.shields.io/badge/Tests-33%2B%20Quality%20Gates-brightgreen)](#-complete-universal-test-suite)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B%20Harness-blue)](#-shift-left-cli-tooling)
+[![Hugo Extended](https://img.shields.io/badge/Generator-Hugo%20Extended-FF4088)](#-local-development-quickstart)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
@@ -16,23 +17,24 @@ Traditional Content Management Systems (CMS) like WordPress or Drupal run monoli
 - **SQL Injection (SQLi)** and Broken Object-Level Authorization (BOLA).
 - **Admin Credential Stuffing** and brute-force authentication attacks.
 - **Supply-Chain Vulnerabilities** in dynamic server plugins.
+- **Accidental Draft & Workstation Leakage** into publicly indexed assets.
 
-**The Solution**: Treat publishing like an enterprise software release.
-This starter compiles markdown into an immutable static bundle (`./public`), validates that output against automated security unit tests, and delivers it to edge CDNs with zero server-side runtime code.
+**The Solution**: Treat static publishing like an enterprise software release.
+This starter compiles markdown into an immutable static bundle (`./public`), validates that output against automated security, accessibility, and functional unit tests, and delivers it to edge CDNs with zero server-side runtime code.
 
 ---
 
 ## 🏛️ Architecture: Decoupled Core vs. Pluggable Adapters
 
-A key design principle of this repository is **Provider Independence**:
+A key design principle of this engine is **Provider Independence**:
 
 ```mermaid
 graph TD
     subgraph Core Gatekeeper [Platform-Agnostic Starter Engine]
         A[Git Commit] --> B[Gitleaks Secret Scan]
         B --> C[Hugo Extended Compilation]
-        C --> D[Headless Python Security & Functional Gates]
-        D --> E[Verified Artifact: ./public]
+        C --> D[Headless Python Security, Functional & Agent Gates]
+        D --> E[Verified Static Artifact: ./public]
     end
 
     subgraph Pluggable Deployment Adapters [Destination Layer]
@@ -47,208 +49,193 @@ The core verification workflow ([`.github/workflows/reusable-verify.yml`](.githu
 
 ---
 
-## 🛡️ The 4 DevSecOps Quality Gates
+## 🛡️ The 5 DevSecOps Quality Pillars
 
-Every build is validated against 4 automated gates:
+Every build is validated against 5 automated quality pillars:
 
-### Gate 1: Supply Chain & Secret Scanning
-- **Engine**: [Gitleaks](https://github.com/gitleaks/gitleaks)
-- Scans git history and commits for accidentally staged API keys, private tokens, RSA keys, and database passwords before Hugo is executed.
+### 1. Static Purity & UDL Performance
+- **Zero Heavy Framework Bloat**: Scans compiled HTML, JS, and layout templates to prohibit heavy client-side frameworks (React, Vue, jQuery, Angular, Svelte runtime).
+- **Universal Design for Learning (UDL)**: Enforces lightweight vanilla HTML5/CSS and minimal progressive-enhancement JavaScript so content is 100% accessible on low-spec hardware and mobile networks.
 
-### Gate 2: Static Compilation & Garbage Collection
-- **Engine**: Hugo Extended (`hugo --minify --gc --cleanDestinationDir`)
-- Compiles markdown into minified, canonical HTML/CSS/JS with zero dead assets or stale build artifacts.
+### 2. DevSecOps Anti-Leakage & Staging Quarantine
+- **Draft Containment** (`test_no_draft_leakage`): Asserts that markdown files with `draft: true` are never compiled into `public/`, leaked into `sitemap.xml`, or indexed in `index.json`.
+- **Future-Date Isolation** (`test_no_future_dated_posts_leakage`): Validates scheduled posts (`publishDate > now`) remain withheld when `buildFuture = false`.
+- **Local Path Sanitization** (`test_no_local_path_leakage`): Confirms no workstation paths (`C:\Users\...`, `/home/runner/...`, `/Users/...`) leak into generated HTML/JS/JSON/CSS artifacts.
+- **Sensitive File Elimination** (`test_no_sensitive_files_in_public`): Guarantees `.env`, `.git`, `.lock`, private keys (`-----BEGIN KEY-----`), or config secrets never end up in distribution.
+- **Editorial Quarantine** (`test_editorial_drafts_quarantine`): Quarantines `_distribution*`, staging notes, and vault sync buffers.
 
-### Gate 3: Headless Python Security & Functional Gates
-- **Engine**: Standalone Python 3.12 test harness (`tests/`) running against the compiled `./public` directory:
-  - **Draft Containment** (`test_no_draft_leakage`): Asserts that markdown files with `draft: true` are never compiled into `public/`, leaked into `sitemap.xml`, or indexed in `index.json`.
-  - **Future-Date Isolation** (`test_no_future_dated_posts_leakage`): Validates that scheduled posts (`publishDate > now`) are withheld until their release date when `buildFuture = false`.
-  - **Local Path Sanitization** (`test_no_local_path_leakage`): Confirms no workstation paths (`C:\Users\...` or `/home/runner/...`) leak into the generated HTML.
-  - **Subresource Integrity (SRI)** (`test_subresource_integrity_on_cdn_assets`): Verifies that external CDN scripts (e.g. KaTeX, Mermaid) enforce cryptographic SHA hashes.
-  - **Tabnabbing Protection** (`test_external_links_tabnabbing_protection`): Ensures all `target="_blank"` links include `rel="noopener noreferrer"`.
-  - **Sensitive File Elimination** (`test_no_sensitive_files_in_public`): Ensures `.env`, lock files, `.git`, or key files never end up in distribution.
-  - **Edge Header Enforcement** (`test_edge_security_headers`): Validates presence of strict browser security headers.
+### 3. Accessibility & WCAG 2.1 AA Compliance
+- **HTML5 Landmarks** (`test_landmark_html5_semantics`): Enforces `<header>`, `<nav>`, `<main>`, and `<footer>` semantic hierarchy on all viewable pages.
+- **Keyboard Focus Indicators** (`test_focus_visible_css_present`): Requires visible `:focus-visible` CSS rules for keyboard navigation.
+- **SEO & Single H1** (`test_seo_single_h1_per_page`): Restricts every non-redirect page to exactly one `<h1>`.
+- **Accessible Imagery** (`test_seo_image_alt_attributes`): Requires non-empty `alt` attributes on all images.
 
-### Gate 4: Edge Defense-in-Depth (`static/_headers`)
-Pre-configured HTTP headers for Cloudflare Pages, Netlify, or edge proxies:
-```http
-/*
-  X-Content-Type-Options: nosniff
-  X-Frame-Options: SAMEORIGIN
-  Content-Security-Policy: frame-ancestors 'self'
-  Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: geolocation=(), camera=(), microphone=()
-  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-```
+### 4. Permalink & Citation Integrity (Zero Broken Links)
+- **Baseline Slug Verification** (`test_canonical_slug_baseline_integrity`): Validates that 100% of URLs in `data/canonical_slugs.json` exist in the build.
+- **Root-Relative Isolation** (`test_no_hardcoded_production_origin_in_templates`): Internal navigation in templates and markdown must use root-relative links (`/posts/` or `{{ .RelPermalink }}`), keeping staging/preview and local environments isolated from production.
+- **Academic Citation Integrity** (`test_citation_identifier_formats`): Enforces standard formatting for DOI (`10.xxxx/...`) and ORCID identifiers.
 
----
-
-## 🚀 Pluggable Deployment Adapters
-
-Once the core gatekeeper passes, pick your preferred deployment destination:
-
-### Adapter A: Cloudflare Pages
-```yaml
-deploy-cloudflare:
-  needs: verify
-  runs-on: ubuntu-latest
-  steps:
-    - uses: actions/download-artifact@v4
-      with: { name: verified-public-site, path: public }
-    - uses: cloudflare/wrangler-action@v3
-      with:
-        apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        command: pages deploy public --project-name=my-site --commit-dirty=true
-```
-
-### Adapter B: GitHub Pages
-```yaml
-deploy-ghpages:
-  needs: verify
-  runs-on: ubuntu-latest
-  permissions:
-    pages: write
-    id-token: write
-  steps:
-    - uses: actions/download-artifact@v4
-      with: { name: verified-public-site, path: public }
-    - uses: actions/upload-pages-artifact@v3
-      with: { path: public }
-    - uses: actions/deploy-pages@v4
-```
-
-### Adapter C: AWS S3 + CloudFront
-```yaml
-deploy-aws:
-  needs: verify
-  runs-on: ubuntu-latest
-  steps:
-    - uses: actions/download-artifact@v4
-      with: { name: verified-public-site, path: public }
-    - uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
-    - run: aws s3 sync public/ s3://${{ secrets.S3_BUCKET_NAME }} --delete
-    - run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
-```
+### 5. Edge Defense-in-Depth & RFC 9116
+- **Subresource Integrity (SRI)** (`test_subresource_integrity_on_cdn_assets`): Verifies external CDN assets enforce SHA hashes (`sha256-`, `sha384-`, `sha512-`) with `crossorigin="anonymous"`.
+- **Tabnabbing Protection** (`test_external_links_tabnabbing_protection`): Ensures all `target="_blank"` links enforce `rel="noopener noreferrer"`.
+- **RFC 9116 Compliance** (`test_security_txt_rfc9116`): Validates `.well-known/security.txt` has a valid `Contact:` URI and future `Expires:` timestamp.
+- **Security Headers** (`test_edge_security_headers`): Enforces pre-configured HTTP security headers:
+  ```http
+  /*
+    X-Content-Type-Options: nosniff
+    X-Frame-Options: SAMEORIGIN
+    Content-Security-Policy: frame-ancestors 'self'
+    Referrer-Policy: strict-origin-when-cross-origin
+    Permissions-Policy: geolocation=(), camera=(), microphone=()
+    Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+  ```
 
 ---
 
-## 🔒 The Two-Tier Architecture: Keeping Drafts Private
+## 🧪 Complete Universal Test Suite
 
-If you maintain a private publication but want to use this public starter, you cannot use "private branches" (GitHub repository visibility is all-or-nothing). Instead, use the **Two-Tier Pattern**:
+The test harness in `tests/` is fully modular and dynamically configurable:
 
-### Pattern 1: Git Upstream Remote (Recommended)
-Add this public starter as an upstream remote inside your private authoring vault:
+| Module | Purpose | Key Tests |
+|---|---|---|
+| [`tests/test_security.py`](tests/test_security.py) | Anti-leakage, SRI, XSS, tabnabbing, headers | `test_no_draft_leakage`, `test_no_future_dated_posts_leakage`, `test_no_local_path_leakage`, `test_subresource_integrity_on_cdn_assets`, `test_edge_security_headers`, `test_security_txt_rfc9116` |
+| [`tests/test_functional.py`](tests/test_functional.py) | HTML semantic structure, SEO, sitemaps, RSS | `test_html_document_structure`, `test_viewport_meta_responsive`, `test_seo_single_h1_per_page`, `test_canonical_links`, `test_internal_links_and_assets`, `test_sitemap_xml`, `test_rss_feed_xml` |
+| [`tests/test_agent_rules.py`](tests/test_agent_rules.py) | AGENTS.md rules, static purity, landmarks, baseline slugs | `test_static_purity_no_heavy_js_frameworks`, `test_landmark_html5_semantics`, `test_focus_visible_css_present`, `test_canonical_slug_baseline_integrity`, `test_no_hardcoded_production_origin_in_templates` |
+| [`tests/test_utils.py`](tests/test_utils.py) | Dynamic config discovery, DOM parsing, caching | Auto-detects `hugo.toml`, `.devsecops.json`, `data/canonical_slugs.json`, parses HTML AST |
+
+---
+
+## ⚡ Shift-Left CLI Tooling
+
+Catch regressions and vulnerabilities on your local machine *before* pushing to git:
+
+### 1. One-Command Full Verification Runner
+Run secret scans, Hugo compilation, and the full DevSecOps test harness:
 ```bash
-git remote add starter https://github.com/SixFiveMil/hugo-devsecops-starter.git
+python scripts/verify.py
 ```
-When updates are made to the starter's test harness or CI workflow, pull them into your private vault:
-```bash
-git fetch starter
-git merge starter/main
-```
-Git cleanly merges updates to `tests/` and `.github/`, leaving your private `content/` drafts untouched.
 
-### Pattern 2: Reusable GitHub Action (`workflow_call`)
-In your private repo's `.github/workflows/deploy.yml`, invoke the public verifier and pass secrets:
+Options:
+- `python scripts/verify.py -v`: Enable verbose test execution output.
+- `python scripts/verify.py --skip-gitleaks`: Skip local Gitleaks check (if not installed locally).
+- `python scripts/verify.py --skip-hugo`: Run tests against existing `public/` directory.
+
+### 2. Automatic Pre-Push Git Hook
+Install the turnkey pre-push hook to automatically block any failing push:
+```bash
+python scripts/install_git_hooks.py
+```
+
+Now, every time you run `git push`, the entire DevSecOps test engine runs locally. If a draft leaks or a broken link is introduced, the push is safely aborted.
+
+---
+
+## 🚀 1-Line Reusable CI Integration
+
+Adopt this entire DevSecOps engine into any private or public Hugo repository using GitHub Actions:
+
+Create `.github/workflows/deploy.yml` in your repository:
+
 ```yaml
+name: Production Release Pipeline
+
+on:
+  push:
+    branches: [main, master]
+
 jobs:
+  # 1-Line DevSecOps Verification Gate
   verify:
     uses: SixFiveMil/hugo-devsecops-starter/.github/workflows/reusable-verify.yml@main
     secrets: inherit
 
+  # Pluggable Deployment Adapter (runs only if 100% of gates pass)
   deploy:
     needs: verify
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
-        with: { name: verified-public-site, path: public }
-      # Your private deploy adapter here (Cloudflare Pages, AWS S3, etc.)
+      - name: Download Verified Static Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: verified-public-site
+          path: public/
+      
+      # Example: Deploy to Cloudflare Pages
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy public --project-name=my-site --commit-dirty=true
 ```
 
 ---
 
-## ⚠️ Implementation Guidance & Troubleshooting Pitfalls
+## ⚙️ Configuration & Customization
 
-Integrating a private repository with an external reusable workflow has several non-obvious traps. Keep these battle-tested rules in mind:
+The test engine automatically adapts to your site settings, with optional configuration overrides:
 
-### 1. No `name` or `runs-on` on Reusable Workflow Caller Jobs
-In GitHub Actions, a job that calls a reusable workflow via `uses:` is a special orchestration job. Adding `name:`, `runs-on:`, `env:`, or `steps:` at that job level will cause GitHub Actions to reject the entire workflow file with a syntax validation error before running any jobs.
+### 1. Standard `hugo.toml`
+The engine automatically extracts `baseURL`, `title`, `locale`, `buildDrafts`, and `buildFuture` from `hugo.toml`.
 
-```yaml
-# ❌ INCORRECT (Triggers workflow parser failure)
-jobs:
-  verify:
-    name: Run DevSecOps Gates  # <--- FORBIDDEN
-    runs-on: ubuntu-latest     # <--- FORBIDDEN
-    uses: SixFiveMil/hugo-devsecops-starter/.github/workflows/reusable-verify.yml@main
-
-# ✅ CORRECT
-jobs:
-  verify:
-    uses: SixFiveMil/hugo-devsecops-starter/.github/workflows/reusable-verify.yml@main
-    secrets: inherit
+### 2. Optional `.devsecops.json` (or `data/devsecops.json`)
+Override or extend security rules:
+```json
+{
+  "canonical_domain": "example.com",
+  "cdn_domains": [
+    "cdnjs.cloudflare.com",
+    "cdn.jsdelivr.net",
+    "unpkg.com"
+  ],
+  "banned_js_frameworks": [
+    "react",
+    "react-dom",
+    "vue",
+    "angular",
+    "jquery"
+  ],
+  "require_security_txt": true,
+  "require_edge_headers": true
+}
 ```
 
-### 2. Avoid Nested Concurrency Deadlocks
-If the caller workflow defines a concurrency lock:
-```yaml
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+### 3. Baseline Slugs (`data/canonical_slugs.json`)
+Protect your search rankings and citations by enforcing a baseline of permanent slugs:
+```json
+[
+  "hello-devsecops",
+  "posts/getting-started",
+  "about"
+]
 ```
-And the child reusable workflow defines the exact same concurrency block, GitHub evaluates `${{ github.workflow }}` to the caller's workflow name. Both parent and child attempt to lock the exact same mutex, triggering an immediate cancellation:
-> `Canceling since a deadlock was detected for concurrency group: '...' between a top level workflow and 'verify'`
-
-**Rule**: Never define top-level concurrency inside a reusable workflow file (`workflow_call`). Concurrency belongs strictly in the caller pipeline.
-
-### 3. Always Specify `secrets: inherit`
-By default, GitHub Actions does **not** pass secrets—not even `secrets.GITHUB_TOKEN`—into a called reusable workflow. If any step (such as Gitleaks secret scanning) relies on `GITHUB_TOKEN`, you must explicitly declare `secrets: inherit` in the caller job.
-
-### 4. Recursive Submodule Checkout
-If your private repository includes Hugo themes via Git submodules (e.g. `themes/PaperMod`), the checkout step inside the reusable workflow must specify `submodules: recursive` and `fetch-depth: 0`, or Hugo will fail during compilation.
 
 ---
 
 ## 💻 Local Development Quickstart
 
-### 1. Prerequisites
-- **Hugo Extended** (v0.128+ recommended)
-- **Python 3.10+**
-- **Git**
-
-### 2. Local Preview
 ```bash
-# Start local Hugo development server with drafts enabled
+# 1. Clone repository
+git clone https://github.com/SixFiveMil/hugo-devsecops-starter.git
+cd hugo-devsecops-starter
+
+# 2. Install pre-push hooks
+python scripts/install_git_hooks.py
+
+# 3. Start local development server
 hugo server -D
-```
 
-### 3. Run Automated Security Quality Gates
-```bash
-# Build the site
-hugo --minify --gc
-
-# Run the 18-point DevSecOps test suite
-python -m unittest discover -s tests -v
-```
-
-### 4. Scan for Secrets
-```bash
-gitleaks detect --source . --verbose
+# 4. Run full DevSecOps verification
+python scripts/verify.py
 ```
 
 ---
 
-## 🌐 Production Implementation
+## 🌐 Production Provenance
 
-This engine powers the zero-trust publication and automated CI/CD release pipeline for [Code and Cypher](https://codeandcypher.com/), an enterprise cybersecurity research publication by Joshua A. Wortz.
+This engine was extracted and generalized from the production DevSecOps and release architecture powering [Code and Cypher](https://codeandcypher.com/), an enterprise cybersecurity and cryptography research publication by Joshua A. Wortz.
 
 ---
 
 ## 📄 License
 This project is open-source under the [MIT License](LICENSE).
-

@@ -1,0 +1,27 @@
+#!/bin/sh
+# Universal Hugo DevSecOps Pre-Push Verification Hook
+# Prevents unverified, insecure, or broken static builds from ever being pushed to git remotes.
+
+echo "========================================================================"
+echo " [DEVSECOPS] Executing Shift-Left Quality & Security Pre-Push Gates... "
+echo "========================================================================"
+
+# Run verification runner
+if command -v python3 >/dev/null 2>&1; then
+    python3 scripts/verify.py
+elif command -v python >/dev/null 2>&1; then
+    python scripts/verify.py
+else
+    echo "[!] Python is required to run DevSecOps pre-push quality gates."
+    exit 1
+fi
+
+RESULT=$?
+if [ $RESULT -ne 0 ]; then
+    echo ""
+    echo "[!] PUSH REJECTED: DevSecOps quality gates failed. Please fix violations before pushing."
+    echo ""
+    exit 1
+fi
+
+exit 0

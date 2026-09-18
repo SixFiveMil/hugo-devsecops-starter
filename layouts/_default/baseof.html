@@ -6,15 +6,18 @@
   <title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title }} | {{ site.Title }}{{ end }}</title>
   <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ site.Params.description }}{{ end }}">
   <link rel="canonical" href="{{ .Permalink }}">
+  <link rel="stylesheet" href="{{ "css/style.css" | relURL }}">
 </head>
 <body>
-  <header>
-    <h1><a href="{{ site.Home.RelPermalink }}">{{ site.Title }}</a></h1>
+  <header role="banner">
+    <nav aria-label="Main Navigation">
+      <a class="site-title" href="{{ site.Home.RelPermalink }}">{{ site.Title }}</a>
+    </nav>
   </header>
-  <main>
+  <main id="main-content" role="main">
     {{ block "main" . }}{{ end }}
   </main>
-  <footer>
+  <footer role="contentinfo">
     <p>&copy; {{ now.Year }} {{ site.Params.author }}. Built with Hugo DevSecOps Starter.</p>
   </footer>
 </body>

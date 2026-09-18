@@ -1,18 +1,44 @@
-name: Agnostic Hugo DevSecOps Verification
+name: Universal Hugo DevSecOps Verification
 
 on:
   workflow_call:
+    inputs:
+      hugo-version:
+        description: "Hugo version to install"
+        required: false
+        type: string
+        default: "latest"
+      python-version:
+        description: "Python version for test suite execution"
+        required: false
+        type: string
+        default: "3.12"
+      extended:
+        description: "Use Hugo Extended edition"
+        required: false
+        type: boolean
+        default: true
+      upload-artifact:
+        description: "Whether to upload compiled public/ artifacts"
+        required: false
+        type: boolean
+        default: true
+      artifact-name:
+        description: "Name of the uploaded artifact"
+        required: false
+        type: string
+        default: "verified-public-site"
   push:
-    branches: [main, master]
+    branches: [main, master, develop]
   pull_request:
-    branches: [main, master]
+    branches: [main, master, develop]
 
 permissions:
   contents: read
 
 jobs:
   verify:
-    name: Build & Verify (DevSecOps Quality Gates)
+    name: Build & Verify (Universal DevSecOps Gates)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -35,8 +61,8 @@ jobs:
           {
             "build_time_utc": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')",
             "git_commit_sha": "${{ github.sha }}",
-            "git_commit_short": "$(git rev-parse --short HEAD || echo '${{ github.sha }}' | cut -c1-7)",
-            "quality_gates": "Automated DevSecOps Harness",
+            "git_commit_short": "$(git rev-parse --short HEAD 2>/dev/null || echo '${{ github.sha }}' | cut -c1-7)",
+            "quality_gates": "Universal Hugo DevSecOps Engine",
             "gitleaks_status": "Clean (0 secrets detected)",
             "engine": "Hugo Extended"
           }
@@ -46,27 +72,28 @@ jobs:
       - name: Set up Hugo Extended
         uses: peaceiris/actions-hugo@v3
         with:
-          hugo-version: "latest"
-          extended: true
+          hugo-version: ${{ inputs.hugo-version || 'latest' }}
+          extended: ${{ inputs.extended != false }}
 
       # Compile immutable static assets
-      - name: Build Site
+      - name: Build Hugo Site
         run: hugo --minify --gc --cleanDestinationDir
 
-      # Set up Python for headless HTML quality gates
+      # Set up Python for headless HTML & DevSecOps quality gates
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ inputs.python-version || '3.12' }}
 
-      # DevSecOps Gate 2: Headless Python quality & security test suite
-      - name: Run Quality & Security Gates
+      # DevSecOps Gate 2: Headless Python quality, accessibility & security test suite
+      - name: Run Universal DevSecOps & Quality Test Suite
         run: python -m unittest discover -s tests -v
 
       # Archive verified static artifact for pluggable deployment adapters
       - name: Upload Verified Static Artifact
+        if: ${{ inputs.upload-artifact != false }}
         uses: actions/upload-artifact@v4
         with:
-          name: verified-public-site
+          name: ${{ inputs.artifact-name || 'verified-public-site' }}
           path: public/
           retention-days: 1
