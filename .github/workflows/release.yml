@@ -1,0 +1,47 @@
+name: Semantic Release & Version Tagging
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  tag-release:
+    name: Auto-Bump Version & Publish Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate Semantic Git Tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: patch
+          create_annotated_tag: true
+          tag_prefix: "v"
+
+      - name: Update Floating Major Version Tag
+        if: steps.tag_version.outputs.new_tag != ''
+        run: |
+          MAJOR_VERSION=$(echo "${{ steps.tag_version.outputs.new_tag }}" | cut -d. -f1)
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -fa "$MAJOR_VERSION" -m "Update floating major tag $MAJOR_VERSION to ${{ steps.tag_version.outputs.new_tag }}"
+          git push origin "$MAJOR_VERSION" --force
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: steps.tag_version.outputs.new_tag != ''
+        with:
+          tag_name: ${{ steps.tag_version.outputs.new_tag }}
+          name: Release ${{ steps.tag_version.outputs.new_tag }}
+          body: ${{ steps.tag_version.outputs.changelog }}
+          generate_release_notes: false
+

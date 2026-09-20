@@ -178,6 +178,13 @@ The starter ships with a pre-configured [`.github/dependabot.yml`](.github/depen
 - **Git Submodules Ecosystem**: Automatically tracks upstream releases and security patches for Hugo themes residing in `themes/*`.
 - **Zero-Trust Gated Validation**: Dependabot PRs run under restricted read-only permissions and must pass 100% of the 33+ headless Python DevSecOps test gates and Gitleaks scans before merge approval.
 
+### 3. Automated Semantic Versioning & Release Tagging
+
+When merging changes from `develop` into `main`, [`.github/workflows/release.yml`](.github/workflows/release.yml) automatically:
+- **Analyzes Conventional Commits**: Computes semantic version increments (`feat:` → minor, `fix:` / `chore:` / `chore(deps-actions):` → patch, `BREAKING CHANGE:` → major).
+- **Creates Annotated Git Tags**: Publishes `vX.Y.Z` tags and updates floating major version pointers (e.g., `v1`).
+- **Publishes GitHub Releases**: Automatically generates release notes and categorized changelogs for downstream dependency tracking.
+
 ---
 
 ## ⚙️ Configuration & Customization
