@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: recursive
           fetch-depth: 0
@@ -82,7 +82,7 @@ jobs:
 
       # Set up Python for headless HTML & DevSecOps quality gates
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ inputs.python-version || '3.12' }}
 
@@ -93,7 +93,7 @@ jobs:
       # Archive verified static artifact for pluggable deployment adapters
       - name: Upload Verified Static Artifact
         if: ${{ inputs.upload-artifact != false }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ inputs.artifact-name || 'verified-public-site' }}
           path: public/
