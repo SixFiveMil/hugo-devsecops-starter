@@ -4,6 +4,7 @@
 
 [![DevSecOps Engine](https://img.shields.io/badge/DevSecOps-Automated%20Gates-blue)](#-the-5-devsecops-quality-pillars)
 [![Gitleaks](https://img.shields.io/badge/Security-Gitleaks%20Protected-green)](#gate-1-supply-chain--secret-scanning)
+[![Dependabot](https://img.shields.io/badge/Dependabot-Supply%20Chain%20Protected-0366d6)](.github/dependabot.yml)
 [![Tests: 33+ Universal Gates](https://img.shields.io/badge/Tests-33%2B%20Quality%20Gates-brightgreen)](#-complete-universal-test-suite)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B%20Harness-blue)](#-shift-left-cli-tooling)
 [![Hugo Extended](https://img.shields.io/badge/Generator-Hugo%20Extended-FF4088)](#-local-development-quickstart)
@@ -134,6 +135,7 @@ Now, every time you run `git push`, the entire DevSecOps test engine runs locall
 
 Adopt this entire DevSecOps engine into any private or public Hugo repository using GitHub Actions:
 
+### 1. Reusable Workflow Caller
 Create `.github/workflows/deploy.yml` in your repository:
 
 ```yaml
@@ -168,6 +170,13 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy public --project-name=my-site --commit-dirty=true
 ```
+
+### 2. Automated Supply-Chain Security (Dependabot)
+
+The starter ships with a pre-configured [`.github/dependabot.yml`](.github/dependabot.yml) to automate vulnerability patching and continuous maintenance:
+- **GitHub Actions Ecosystem**: Weekly automated updates for all actions in `.github/workflows/`, grouped into a single unified PR to eliminate alert fatigue.
+- **Git Submodules Ecosystem**: Automatically tracks upstream releases and security patches for Hugo themes residing in `themes/*`.
+- **Zero-Trust Gated Validation**: Dependabot PRs run under restricted read-only permissions and must pass 100% of the 33+ headless Python DevSecOps test gates and Gitleaks scans before merge approval.
 
 ---
 
