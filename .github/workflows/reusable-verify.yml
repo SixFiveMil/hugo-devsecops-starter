@@ -28,6 +28,11 @@ on:
         required: false
         type: string
         default: "verified-public-site"
+      upload-gitleaks-artifact:
+        description: "Whether to upload Gitleaks SARIF scan report artifact"
+        required: false
+        type: boolean
+        default: false
   push:
     branches: [main, master, develop]
   pull_request:
@@ -53,6 +58,7 @@ jobs:
         uses: gitleaks/gitleaks-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: ${{ inputs.upload-gitleaks-artifact == true }}
 
       # Inject sanitized build telemetry into data/ before Hugo compilation
       - name: Generate Build Telemetry Data
